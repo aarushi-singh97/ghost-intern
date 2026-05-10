@@ -80,24 +80,20 @@ export default function Home() {
       <div
         style={{
           width: "100%",
-          maxWidth: "1250px",
+          maxWidth: "1280px",
           margin: "0 auto",
+          paddingBottom: "60px",
         }}
       >
         <div
           style={{
             display: "flex",
-
             justifyContent:
               "space-between",
-
             alignItems: "flex-start",
-
-            gap: "40px",
-
+            gap: "50px",
             flexWrap: "wrap",
-
-            marginBottom: "60px",
+            marginBottom: "70px",
           }}
         >
           <div
@@ -109,70 +105,57 @@ export default function Home() {
             <div
               style={{
                 display: "inline-flex",
-
                 alignItems: "center",
-
                 gap: "10px",
-
                 padding:
-                  "10px 18px",
-
+                  "12px 22px",
                 borderRadius:
                   "999px",
-
                 background:
-                  "rgba(139, 92, 246, 0.12)",
-
+                  "rgba(124,92,255,0.12)",
                 border:
-                  "1px solid rgba(139, 92, 246, 0.2)",
-
-                color: "#8b5cf6",
-
-                fontWeight: "600",
-
+                  "1px solid rgba(124,92,255,0.22)",
+                color: "#9f7aea",
+                fontWeight: "700",
                 marginBottom:
-                  "28px",
+                  "30px",
+                backdropFilter:
+                  "blur(10px)",
+                boxShadow:
+                  "0 0 30px rgba(124,92,255,0.18)",
               }}
             >
-              👻 Ghost Intelligence
-              Workspace
+              👻 Ghost Intelligence Workspace
             </div>
 
             <h1
               style={{
                 fontSize:
-                  "clamp(52px, 7vw, 92px)",
-
-                lineHeight: 1,
-
+                  "clamp(58px, 8vw, 110px)",
+                lineHeight: "0.95",
                 fontWeight: "900",
-
                 letterSpacing:
-                  "-4px",
-
-                color:
-                  "var(--text-primary)",
-
+                  "-5px",
+                color: "#ffffff",
                 marginBottom:
-                  "28px",
-
+                  "34px",
                 maxWidth: "900px",
+                textShadow:
+                  "0 0 35px rgba(255,255,255,0.08)",
               }}
             >
-              Analyze repositories
-              with AI-powered
+              Analyze
+              repositories with
+              AI-powered
               intelligence
             </h1>
 
             <p
               style={{
-                fontSize: "20px",
-
-                lineHeight: 1.8,
-
+                fontSize: "21px",
+                lineHeight: 1.9,
                 color:
-                  "var(--text-secondary)",
-
+                  "rgba(255,255,255,0.72)",
                 maxWidth: "760px",
               }}
             >
@@ -183,7 +166,7 @@ export default function Home() {
               developer insights
               through an intelligent
               analysis workspace
-              designed for
+              designed for modern
               engineers.
             </p>
           </div>
@@ -191,33 +174,25 @@ export default function Home() {
           <div
             style={{
               width: "320px",
-
               background:
-                "var(--card-bg)",
-
+                "rgba(15,23,42,0.75)",
               border:
-                "1px solid var(--border-color)",
-
-              borderRadius: "28px",
-
-              padding: "28px",
-
+                "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "30px",
+              padding: "30px",
               backdropFilter:
-                "blur(14px)",
-
+                "blur(18px)",
               boxShadow:
-                "0 10px 40px rgba(0,0,0,0.15)",
+                "0 0 45px rgba(124,92,255,0.12)",
             }}
           >
             <h3
               style={{
-                color:
-                  "var(--text-primary)",
-
-                fontSize: "28px",
-
+                color: "#ffffff",
+                fontSize: "32px",
                 marginBottom:
-                  "14px",
+                  "18px",
+                fontWeight: "800",
               }}
             >
               AI Analysis Engine
@@ -226,32 +201,25 @@ export default function Home() {
             <div
               style={{
                 display: "flex",
-
                 alignItems:
                   "center",
-
-                gap: "12px",
-
+                gap: "14px",
                 color:
-                  "var(--text-secondary)",
-
-                fontSize: "16px",
+                  "rgba(255,255,255,0.72)",
+                fontSize: "17px",
+                lineHeight: 1.5,
               }}
             >
               <div
                 style={{
-                  width: "12px",
-
-                  height: "12px",
-
+                  width: "14px",
+                  height: "14px",
                   borderRadius:
                     "50%",
-
                   background:
                     "#22c55e",
-
                   boxShadow:
-                    "0 0 14px #22c55e",
+                    "0 0 20px #22c55e",
                 }}
               />
 
@@ -263,6 +231,16 @@ export default function Home() {
 
         <div
           style={{
+            background:
+              "rgba(15,23,42,0.72)",
+            border:
+              "1px solid rgba(124,92,255,0.18)",
+            borderRadius: "34px",
+            padding: "28px",
+            backdropFilter:
+              "blur(18px)",
+            boxShadow:
+              "0 0 60px rgba(124,92,255,0.18)",
             marginBottom: "40px",
           }}
         >
