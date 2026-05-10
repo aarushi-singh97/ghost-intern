@@ -1,26 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-import Sidebar from "../components/Sidebar";
-import WorkspaceHeader from "../components/WorkspaceHeader";
-
+import Layout from "../components/Layout";
 import RepoInputCard from "../components/RepoInputCard";
-import RepoHeaderCard from "../components/RepoHeaderCard";
-import TechStackCard from "../components/TechStackCard";
-import KeyFilesCard from "../components/KeyFilesCard";
-import AISummaryCard from "../components/AISummaryCard";
-import ChatCard from "../components/ChatCard";
-
+import AnalysisGrid from "../components/AnalysisGrid";
 import LoadingState from "../components/LoadingState";
 import ErrorState from "../components/ErrorState";
 
 import {
-  analyzeRepo,
-  askQuestion,
+  analyzeRepository,
 } from "../services/api";
 
 export default function Home() {
-  const [state, setState] =
-    useState("idle");
+  const [repoUrl, setRepoUrl] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
 
   const [error, setError] =
     useState("");
@@ -28,207 +23,275 @@ export default function Home() {
   const [data, setData] =
     useState(null);
 
-  const [isMobile, setIsMobile] =
-    useState(window.innerWidth < 900);
+  const handleAnalyze =
+    async () => {
+      if (!repoUrl.trim()) {
+        setError(
+          "Please enter repository URL"
+        );
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(
-        window.innerWidth < 900
-      );
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        setError("");
+
+        const result =
+          await analyzeRepository(
+            repoUrl
+          );
+
+        setData(result);
+
+        const existingRepos =
+          JSON.parse(
+            localStorage.getItem(
+              "recentRepos"
+            ) || "[]"
+          );
+
+        const updatedRepos = [
+          repoUrl,
+          ...existingRepos.filter(
+            (repo) =>
+              repo !== repoUrl
+          ),
+        ].slice(0, 5);
+
+        localStorage.setItem(
+          "recentRepos",
+          JSON.stringify(
+            updatedRepos
+          )
+        );
+      } catch (err) {
+        setError(
+          "Failed to analyze repository"
+        );
+      } finally {
+        setLoading(false);
+      }
     };
 
-    window.addEventListener(
-      "resize",
-      handleResize
-    );
-
-    return () =>
-      window.removeEventListener(
-        "resize",
-        handleResize
-      );
-  }, []);
-
-  const handleAnalyze = async (url) => {
-    setState("loading");
-
-    setError("");
-
-    setData(null);
-
-    try {
-      const result =
-        await analyzeRepo(url);
-
-      setData(result);
-
-      setState("results");
-    } catch (e) {
-      setError(
-        e.message ||
-          "Failed to analyze repository."
-      );
-
-      setState("error");
-    }
-  };
-
-  const handleAsk = async (
-    question
-  ) => {
-    return await askQuestion(
-      question,
-      data
-    );
-  };
-
-  const handleRetry = () => {
-    setState("idle");
-
-    setError("");
-
-    setData(null);
-  };
-
   return (
-    <div className="hero-glow">
-      <Sidebar isMobile={isMobile} />
-
-      <main
+    <Layout>
+      <div
         style={{
-          marginLeft: isMobile
-            ? "0"
-            : "240px",
-
-          minHeight: "100vh",
-
           width: "100%",
-
-          padding: isMobile
-            ? "28px 18px 40px"
-            : "48px 56px",
-
-          position: "relative",
-
-          zIndex: 2,
-
-          overflowX: "hidden",
-
-          boxSizing: "border-box",
-
-          transition:
-            "all 0.25s ease",
+          maxWidth: "1250px",
+          margin: "0 auto",
         }}
       >
         <div
           style={{
-            width: "100%",
+            display: "flex",
 
-            maxWidth: "980px",
+            justifyContent:
+              "space-between",
 
-            margin: "0",
+            alignItems: "flex-start",
 
-            paddingLeft: isMobile
-              ? "0"
-              : "40px",
+            gap: "40px",
+
+            flexWrap: "wrap",
+
+            marginBottom: "60px",
           }}
         >
-          <WorkspaceHeader
-            isMobile={isMobile}
-          />
-
-          <RepoInputCard
-            onAnalyze={handleAnalyze}
-            loading={
-              state === "loading"
-            }
-          />
-
-          {state === "loading" && (
+          <div
+            style={{
+              flex: 1,
+              minWidth: "320px",
+            }}
+          >
             <div
               style={{
-                marginTop: "32px",
+                display: "inline-flex",
+
+                alignItems: "center",
+
+                gap: "10px",
+
+                padding:
+                  "10px 18px",
+
+                borderRadius:
+                  "999px",
+
+                background:
+                  "rgba(139, 92, 246, 0.12)",
+
+                border:
+                  "1px solid rgba(139, 92, 246, 0.2)",
+
+                color: "#8b5cf6",
+
+                fontWeight: "600",
+
+                marginBottom:
+                  "28px",
               }}
             >
-              <LoadingState />
+              👻 Ghost Intelligence
+              Workspace
             </div>
-          )}
 
-          {state === "error" && (
+            <h1
+              style={{
+                fontSize:
+                  "clamp(52px, 7vw, 92px)",
+
+                lineHeight: 1,
+
+                fontWeight: "900",
+
+                letterSpacing:
+                  "-4px",
+
+                color:
+                  "var(--text-primary)",
+
+                marginBottom:
+                  "28px",
+
+                maxWidth: "900px",
+              }}
+            >
+              Analyze repositories
+              with AI-powered
+              intelligence
+            </h1>
+
+            <p
+              style={{
+                fontSize: "20px",
+
+                lineHeight: 1.8,
+
+                color:
+                  "var(--text-secondary)",
+
+                maxWidth: "760px",
+              }}
+            >
+              Explore repository
+              architecture,
+              technologies, code
+              structure, and
+              developer insights
+              through an intelligent
+              analysis workspace
+              designed for
+              engineers.
+            </p>
+          </div>
+
+          <div
+            style={{
+              width: "320px",
+
+              background:
+                "var(--card-bg)",
+
+              border:
+                "1px solid var(--border-color)",
+
+              borderRadius: "28px",
+
+              padding: "28px",
+
+              backdropFilter:
+                "blur(14px)",
+
+              boxShadow:
+                "0 10px 40px rgba(0,0,0,0.15)",
+            }}
+          >
+            <h3
+              style={{
+                color:
+                  "var(--text-primary)",
+
+                fontSize: "28px",
+
+                marginBottom:
+                  "14px",
+              }}
+            >
+              AI Analysis Engine
+            </h3>
+
             <div
               style={{
-                marginTop: "32px",
+                display: "flex",
+
+                alignItems:
+                  "center",
+
+                gap: "12px",
+
+                color:
+                  "var(--text-secondary)",
+
+                fontSize: "16px",
               }}
             >
-              <ErrorState
-                message={error}
-                onRetry={handleRetry}
-              />
-            </div>
-          )}
-
-          {state === "results" &&
-            data && (
               <div
-                className="animate-in"
                 style={{
-                  display: "flex",
+                  width: "12px",
 
-                  flexDirection:
-                    "column",
+                  height: "12px",
 
-                  gap: "28px",
+                  borderRadius:
+                    "50%",
 
-                  marginTop: "40px",
+                  background:
+                    "#22c55e",
+
+                  boxShadow:
+                    "0 0 14px #22c55e",
                 }}
-              >
-                <RepoHeaderCard
-                  repo={data.repo}
-                />
+              />
 
-                <div
-                  style={{
-                    display: "grid",
-
-                    gridTemplateColumns:
-                      isMobile
-                        ? "1fr"
-                        : "repeat(auto-fit, minmax(320px, 1fr))",
-
-                    gap: "24px",
-                  }}
-                >
-                  <TechStackCard
-                    techStack={
-                      data.techStack
-                    }
-                  />
-
-                  <KeyFilesCard
-                    files={
-                      data.keyFiles
-                    }
-                  />
-                </div>
-
-                <AISummaryCard
-                  summary={
-                    data.summary
-                  }
-                  architectureNotes={
-                    data.architectureNotes
-                  }
-                />
-
-                <ChatCard
-                  onAsk={handleAsk}
-                  disabled={false}
-                />
-              </div>
-            )}
+              Real-time repository
+              processing active
+            </div>
+          </div>
         </div>
-      </main>
-    </div>
+
+        <div
+          style={{
+            marginBottom: "40px",
+          }}
+        >
+          <RepoInputCard
+            repoUrl={repoUrl}
+            setRepoUrl={setRepoUrl}
+            onAnalyze={
+              handleAnalyze
+            }
+            loading={loading}
+          />
+        </div>
+
+        {loading && (
+          <LoadingState />
+        )}
+
+        {error && (
+          <ErrorState
+            message={error}
+          />
+        )}
+
+        {data && !loading && (
+          <AnalysisGrid
+            data={data}
+          />
+        )}
+      </div>
+    </Layout>
   );
 }
