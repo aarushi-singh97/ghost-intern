@@ -1,0 +1,4 @@
+.env
+ghost_intern.db
+__pycache__/
+venv/
