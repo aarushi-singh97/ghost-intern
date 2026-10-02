@@ -10,6 +10,7 @@ DATABASE_PATH = Path(__file__).resolve().parent.parent / "ghost_intern.db"
 def get_connection():
     connection = sqlite3.connect(DATABASE_PATH)
     connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA foreign_keys = ON")
 
     try:
         yield connection
@@ -34,6 +35,7 @@ def init_db():
             )
             """
         )
+        connection.execute("CREATE TABLE IF NOT EXISTS revoked_tokens (jti TEXT PRIMARY KEY, expires_at INTEGER NOT NULL)")
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS analyses (
@@ -47,3 +49,4 @@ def init_db():
             )
             """
         )
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_analyses_user_created ON analyses(user_id, created_at DESC)")
