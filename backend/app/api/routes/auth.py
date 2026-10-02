@@ -1,16 +1,17 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.database import get_connection
 from app.models.request_models import LoginRequest, SignupRequest
 from app.models.response_models import AuthResponse, UserResponse
-from app.security import create_access_token, get_current_user, hash_password, verify_password
-from fastapi import Depends
+from app.security import create_access_token, get_current_user, hash_password, revoke_token, verify_password
 
 
 router = APIRouter(
     prefix="/auth",
     tags=["Auth"],
 )
+bearer_scheme = HTTPBearer()
 
 
 def to_user_response(user):
@@ -100,7 +101,8 @@ async def login(request: LoginRequest):
 
 
 @router.post("/logout")
-async def logout():
+async def logout(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
+    revoke_token(credentials.credentials)
     return {
         "message": "Logged out successfully"
     }
@@ -112,3 +114,10 @@ async def logout():
 )
 async def me(current_user=Depends(get_current_user)):
     return current_user
+
+
+@router.delete("/me", status_code=204)
+async def delete_account(current_user=Depends(get_current_user)):
+    with get_connection() as connection:
+        connection.execute("DELETE FROM analyses WHERE user_id = ?", (current_user["id"],))
+        connection.execute("DELETE FROM users WHERE id = ?", (current_user["id"],))

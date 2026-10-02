@@ -52,7 +52,7 @@ async def analyze_repo(
         analysis_json = analysis.model_dump_json()
 
         with get_connection() as connection:
-            connection.execute(
+            cursor = connection.execute(
                 """
                 INSERT INTO analyses (
                     repository_url,
@@ -69,6 +69,7 @@ async def analyze_repo(
                     current_user["id"],
                 ),
             )
+        analysis.id = cursor.lastrowid
 
         return analysis
 

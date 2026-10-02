@@ -156,7 +156,10 @@ function Home() {
     setAnswer('')
 
     try {
-      const result = await askRepositoryQuestion(question.trim(), analysis || {})
+      if (!analysis?.id) {
+        throw new Error('Analyze a repository in this session before asking repository questions.')
+      }
+      const result = await askRepositoryQuestion(question.trim(), analysis.id)
       setAnswer(result.answer)
     } catch (apiError) {
       setAnswer(apiError.message || 'Unable to answer that question right now.')

@@ -55,10 +55,10 @@ export function analyzeRepository(repoUrl) {
   })
 }
 
-export function askRepositoryQuestion(question, context) {
+export function askRepositoryQuestion(question, analysisId) {
   return request('/ask/', {
     method: 'POST',
-    body: JSON.stringify({ question, context }),
+    body: JSON.stringify({ question, analysis_id: analysisId }),
   })
 }
 

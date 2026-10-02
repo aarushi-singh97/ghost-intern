@@ -54,6 +54,7 @@ class ArchitectureData(BaseModel):
 
 
 class RepoAnalysisResponse(BaseModel):
+    id: Optional[int] = None
     repo: RepoData
     techStack: List[str]
     keyFiles: List[str]
