@@ -10,6 +10,13 @@ REQUEST_TIMEOUT = 10
 GITHUB_API_URL = "https://api.github.com"
 
 
+class GitHubServiceError(Exception):
+    def __init__(self, message, status_code=502, retry_after=None):
+        super().__init__(message)
+        self.status_code = status_code
+        self.retry_after = retry_after
+
+
 def github_headers():
     headers = {
         "Accept": "application/vnd.github+json",
@@ -103,11 +110,13 @@ def fetch_github_repo_metadata(
 
         if response.status_code == 200:
             return response.json()
-
-    except requests.RequestException:
-        pass
-
-    return {}
+        if response.status_code == 404:
+            raise GitHubServiceError("Repository was not found or is not accessible.", 404)
+        if response.status_code in (403, 429):
+            raise GitHubServiceError("GitHub rate limit reached. Configure GITHUB_TOKEN or retry later.", 429, response.headers.get("Retry-After"))
+        raise GitHubServiceError("GitHub rejected the repository request.", 502)
+    except requests.RequestException as exc:
+        raise GitHubServiceError("Could not reach GitHub. Please retry.", 503) from exc
 
 
 def fetch_repository_tree(
@@ -639,10 +648,6 @@ def fetch_repository_data(
         repo,
     )
 
-    if not repo_metadata:
-        raise ValueError(
-            "Repository not found or GitHub could not be reached."
-        )
     default_branch = fetch_default_branch(
         repo_metadata,
     )

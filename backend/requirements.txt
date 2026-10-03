@@ -6,3 +6,4 @@ google-genai==1.56.0
 pydantic[email]==2.12.5
 PyJWT==2.10.1
 slowapi==0.1.9
+alembic==1.14.1

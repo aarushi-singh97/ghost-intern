@@ -42,6 +42,9 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 repository_url TEXT NOT NULL,
                 repository_name TEXT NOT NULL,
+                repository_owner TEXT,
+                repository_slug TEXT,
+                languages TEXT NOT NULL DEFAULT '{}',
                 analysis_result TEXT NOT NULL,
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 user_id INTEGER NOT NULL,
@@ -49,4 +52,9 @@ def init_db():
             )
             """
         )
+        for column, definition in (("repository_owner", "TEXT"), ("repository_slug", "TEXT"), ("languages", "TEXT NOT NULL DEFAULT '{}'")):
+            try:
+                connection.execute(f"ALTER TABLE analyses ADD COLUMN {column} {definition}")
+            except sqlite3.OperationalError:
+                pass
         connection.execute("CREATE INDEX IF NOT EXISTS idx_analyses_user_created ON analyses(user_id, created_at DESC)")

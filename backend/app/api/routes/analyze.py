@@ -1,13 +1,15 @@
 import json
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from starlette.concurrency import run_in_threadpool
 
 from app.models.request_models import RepoRequest
 from app.models.response_models import AnalysisHistoryItem, RepoAnalysisResponse
 
 from app.database import get_connection
 from app.security import get_current_user
-from app.services.github_service import fetch_repository_data
+from app.services.github_service import GitHubServiceError, fetch_repository_data
 from app.services.tech_detector import detect_technologies
 from app.services.ai_service import generate_repository_summary
 from app.config import RATE_LIMIT_ANALYZE
@@ -24,6 +26,7 @@ router = APIRouter(
     "/",
     response_model=RepoAnalysisResponse
 )
+logger = logging.getLogger(__name__)
 @limiter.limit(RATE_LIMIT_ANALYZE)
 async def analyze_repo(
     request: Request,
@@ -31,9 +34,7 @@ async def analyze_repo(
     current_user=Depends(get_current_user),
 ):
     try:
-        repo_data = fetch_repository_data(
-            payload.repo_url
-        )
+        repo_data = await run_in_threadpool(fetch_repository_data, payload.repo_url)
 
         tech_stack = detect_technologies(
             repo_data["package_json"],
@@ -61,14 +62,20 @@ async def analyze_repo(
                 INSERT INTO analyses (
                     repository_url,
                     repository_name,
+                    repository_owner,
+                    repository_slug,
+                    languages,
                     analysis_result,
                     user_id
                 )
-                VALUES (?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     payload.repo_url,
                     f"{analysis.repo.owner}/{analysis.repo.name}",
+                    analysis.repo.owner,
+                    analysis.repo.name,
+                    json.dumps(analysis.architecture.languages),
                     analysis_json,
                     current_user["id"],
                 ),
@@ -77,6 +84,9 @@ async def analyze_repo(
 
         return analysis
 
+    except GitHubServiceError as error:
+        headers = {"Retry-After": error.retry_after} if error.retry_after else None
+        raise HTTPException(status_code=error.status_code, detail=str(error), headers=headers) from error
     except ValueError as error:
         raise HTTPException(
             status_code=400,
@@ -84,7 +94,7 @@ async def analyze_repo(
         ) from error
 
     except Exception as error:
-        print(f"Repository analysis failed: {error}")
+        logger.exception("Repository analysis failed")
         raise HTTPException(
             status_code=500,
             detail="Repository analysis failed. Please try again.",

@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import (
     CORSMiddleware,
@@ -19,6 +21,7 @@ app = FastAPI(
     title="Ghost Intern API",
     version="1.0.0",
 )
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -53,3 +56,8 @@ async def root():
         "message":
         "Ghost Intern backend running"
     }
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
