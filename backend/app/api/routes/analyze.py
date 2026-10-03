@@ -1,6 +1,6 @@
 import json
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.models.request_models import RepoRequest
 from app.models.response_models import AnalysisHistoryItem, RepoAnalysisResponse
@@ -10,6 +10,8 @@ from app.security import get_current_user
 from app.services.github_service import fetch_repository_data
 from app.services.tech_detector import detect_technologies
 from app.services.ai_service import generate_repository_summary
+from app.config import RATE_LIMIT_ANALYZE
+from app.rate_limit import limiter
 
 
 router = APIRouter(
@@ -22,13 +24,15 @@ router = APIRouter(
     "/",
     response_model=RepoAnalysisResponse
 )
+@limiter.limit(RATE_LIMIT_ANALYZE)
 async def analyze_repo(
-    request: RepoRequest,
+    request: Request,
+    payload: RepoRequest,
     current_user=Depends(get_current_user),
 ):
     try:
         repo_data = fetch_repository_data(
-            request.repo_url
+            payload.repo_url
         )
 
         tech_stack = detect_technologies(
@@ -63,7 +67,7 @@ async def analyze_repo(
                 VALUES (?, ?, ?, ?)
                 """,
                 (
-                    request.repo_url,
+                    payload.repo_url,
                     f"{analysis.repo.owner}/{analysis.repo.name}",
                     analysis_json,
                     current_user["id"],

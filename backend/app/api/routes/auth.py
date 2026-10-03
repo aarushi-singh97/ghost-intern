@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.database import get_connection
 from app.models.request_models import LoginRequest, SignupRequest
 from app.models.response_models import AuthResponse, UserResponse
 from app.security import create_access_token, get_current_user, hash_password, revoke_token, verify_password
+from app.config import RATE_LIMIT_AUTH
+from app.rate_limit import limiter
 
 
 router = APIRouter(
@@ -27,14 +29,15 @@ def to_user_response(user):
     "/signup",
     response_model=AuthResponse,
 )
-async def signup(request: SignupRequest):
+@limiter.limit(RATE_LIMIT_AUTH)
+async def signup(request: Request, payload: SignupRequest):
     with get_connection() as connection:
         existing_user = connection.execute(
             """
             SELECT id FROM users
             WHERE username = ? OR email = ?
             """,
-            (request.username, request.email),
+            (payload.username, payload.email),
         ).fetchone()
 
         if existing_user:
@@ -49,9 +52,9 @@ async def signup(request: SignupRequest):
             VALUES (?, ?, ?)
             """,
             (
-                request.username,
-                request.email,
-                hash_password(request.password),
+                payload.username,
+                payload.email,
+                hash_password(payload.password),
             ),
         )
         user_id = cursor.lastrowid
@@ -74,7 +77,8 @@ async def signup(request: SignupRequest):
     "/login",
     response_model=AuthResponse,
 )
-async def login(request: LoginRequest):
+@limiter.limit(RATE_LIMIT_AUTH)
+async def login(request: Request, payload: LoginRequest):
     with get_connection() as connection:
         user = connection.execute(
             """
@@ -82,11 +86,11 @@ async def login(request: LoginRequest):
             FROM users
             WHERE email = ?
             """,
-            (request.email,),
+            (payload.email,),
         ).fetchone()
 
     if not user or not verify_password(
-        request.password,
+        payload.password,
         user["hashed_password"],
     ):
         raise HTTPException(

@@ -5,3 +5,4 @@ python-dotenv==1.2.1
 google-genai==1.56.0
 pydantic[email]==2.12.5
 PyJWT==2.10.1
+slowapi==0.1.9

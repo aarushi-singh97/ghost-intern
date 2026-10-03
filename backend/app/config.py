@@ -9,6 +9,9 @@ if len(JWT_SECRET_KEY) < 32:
     raise RuntimeError("JWT_SECRET_KEY must be set and at least 32 characters long.")
 
 CORS_ORIGINS = [item.strip() for item in os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",") if item.strip()]
+RATE_LIMIT_AUTH = os.getenv("RATE_LIMIT_AUTH", "5/minute")
+RATE_LIMIT_ANALYZE = os.getenv("RATE_LIMIT_ANALYZE", "10/minute")
+RATE_LIMIT_ASK = os.getenv("RATE_LIMIT_ASK", "20/minute")
 
 GITHUB_TOKEN = os.getenv(
     "GITHUB_TOKEN"
