@@ -105,7 +105,10 @@ async def login(request: Request, payload: LoginRequest):
 
 
 @router.post("/logout")
-async def logout(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
+async def logout(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    current_user=Depends(get_current_user),
+):
     revoke_token(credentials.credentials)
     return {
         "message": "Logged out successfully"
